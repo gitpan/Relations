@@ -1,9 +1,9 @@
-
+use lib '.';
 use Relations;
 
-$first = 'first';
-$second = 'second';
-$third = 'third';
+$first = '1st';
+$second = '2nd';
+$third = '3rd';
 
 @args_ordered = ($first,$second,$third);
 
@@ -22,6 +22,26 @@ die "ordered rearrange failed" unless (($first_ordered eq $first) and
 die "named rearrange failed" unless (($first_named eq $first) and 
                                      ($second_named eq $second) and 
                                      ($third_named eq $third));
+
+%args_hashed = (first  => $first,
+                second => $second,
+                third  => $third);
+
+($first_hashed,$second_hashed,$third_hashed) = rearrange(['FIRST','SECOND','THIRD'],\%args_hashed);
+
+die "hashed plain rearrange failed" unless (($first_hashed eq $first) and 
+                                      ($second_hashed eq $second) and 
+                                      ($third_hashed eq $third));
+
+%args_hashed = (-first  => $first,
+                -second => $second,
+                -third  => $third);
+
+($first_hashed,$second_hashed,$third_hashed) = rearrange(['FIRST','SECOND','THIRD'],\%args_hashed);
+
+die "hashed minus rearrange failed" unless (($first_hashed eq $first) and 
+                                      ($second_hashed eq $second) and 
+                                      ($third_hashed eq $third));
 
 $bit_byte = "salad bit Garden byte dressing bit Blue Cheese";
 $bit_byte_switch = "dressing bit Blue Cheese byte salad bit Garden";
@@ -110,6 +130,13 @@ $add_comma_other_hand = "I,sky,me,free,car,far";
 die "add_comma_clause failed" unless ($add_comma_hand eq $add_comma_one_hand) ||
                                      ($add_comma_hand eq $add_comma_other_hand);
  
+$add_assign_hand = add_assign_clause($assign_hand,$add_hand);
+$add_assign_one_hand = "me=free,I=sky,car=far";
+$add_assign_other_hand = "I=sky,me=free,car=far";
+
+die "add_assign_clause failed" unless ($add_assign_hand eq $add_assign_one_hand) ||
+                                      ($add_assign_hand eq $add_assign_other_hand);
+ 
 $set_hand = {'link' => 'think'};
 
 $set_as_hand = set_as_clause($as_hand,$set_hand);
@@ -127,6 +154,11 @@ $set_comma_one_hand = "link,think";
 
 die "set_comma_clause failed" unless ($set_comma_hand eq $set_comma_one_hand);
  
+$set_assign_hand = set_assign_clause($assign_hand,$set_hand);
+$set_assign_one_hand = "link=think";
+
+die "set_assign_clause failed" unless ($set_assign_hand eq $set_assign_one_hand);
+ 
 $thing = to_array('fee,fie,foe');
 
 die "to_array failed string" unless (($thing->[0] eq 'fee') and 
@@ -139,11 +171,11 @@ die "to_array failed array" unless (($thang->[0] eq 'me') and
                                     ($thang->[1] eq 'my') and 
                                     ($thang->[2] eq 'moe'));
 
-$bang = to_hash('fee,fie,foe');
+$bing = to_hash('fee,fie,foe');
 
-die "to_hash failed string" unless ($bang->{'fee'} and 
-                                    $bang->{'fie'} and 
-                                    $bang->{'foe'});
+die "to_hash failed string" unless ($bing->{'fee'} and 
+                                    $bing->{'fie'} and 
+                                    $bing->{'foe'});
 
 $bang = to_hash(['me','my','moe']);
 
@@ -171,8 +203,56 @@ $song = add_hash({'yin' => 1},{'yang' => 1});
 die "add_hash failed" unless ($song->{'yin'} and 
                               $song->{'yang'});
 
+open NONE, ">none.txt";
+
+print NONE "\n";
+
+close NONE;
+
+open SOME, ">some.txt";
+
+print SOME "that\n";
+
+close SOME;
+
+open GET, ">get.pl";
+
+print GET "use lib '.';\n";
+print GET "use Relations;\n";
+print GET "\$ans = get_input(\"heyo\",'this');\n";
+print GET "print \"\n\$ans\n\";";
+
+close GET;
+
+open GETTER, "perl get.pl < none.txt |";
+
+$qst = <GETTER>;
+chomp $qst;
+$ans = <GETTER>;
+chomp $ans;
+
+close GETTER;
+
+die "get_input none failed" unless ($qst eq 'heyo [this]:') and ($ans eq 'this');
+                               
+open GETTER, "perl get.pl < some.txt |";
+
+$qst = <GETTER>;
+chomp $qst;
+$ans = <GETTER>;
+chomp $ans;
+
+close GETTER;
+
+die "get_input some failed" unless ($qst eq 'heyo [this]:') and ($ans eq 'that');
+                                        
+unlink 'get.pl';
+unlink 'none.txt';
+unlink 'some.txt';
+
 open SET, ">set.pl";
 
+print SET "use lib '.';\n";
 print SET "use Relations;\n";
 print SET "configure_settings('test','me','hide','here','2525')";
 
@@ -185,8 +265,24 @@ print SETTER "\n";
 print SETTER "\n";
 print SETTER "\n";
 print SETTER "\n";
+print SETTER "\n";
 
 close SETTER;
+
+die "configure deny failed" if (-e 'Settings.pm');
+                               
+open SETTER, "| perl set.pl";
+
+print SETTER "\n";
+print SETTER "\n";
+print SETTER "\n";
+print SETTER "\n";
+print SETTER "\n";
+print SETTER "y\n";
+
+close SETTER;
+
+$i = 0;
 
 open SETTINGS, "<Settings.pm";
 
@@ -211,6 +307,7 @@ print SETTER "you\n";
 print SETTER "find\n";
 print SETTER "there\n";
 print SETTER "5252\n";
+print SETTER "Y\n";
 
 close SETTER;
 
@@ -229,8 +326,10 @@ die "entered configure_settings failed" unless (($database eq 'pass') and
                                                 ($password eq 'find') and 
                                                 ($host eq 'there') and 
                                                 ($port eq '5252'));
-                               
+
+print "\n\n";
+
 unlink 'set.pl';
 unlink 'Settings.pm';
 
-print "\n\nEverything seems fine.\n";
+print "\nEverything seems fine.\n";

@@ -12,7 +12,7 @@
   <TR>
     <TD valign=middle width='100%'
     bgcolor='#cc0066'> <font face='sans-serif' size='+1'
-    color='#ff99cc'>&nbsp;&nbsp;&nbsp;Relations - DBI/DBD::mysql functions to ease development</font>
+    color='#ff99cc'>&nbsp;&nbsp;&nbsp;Relations - Functions to Use with Databases and Queries</font>
     </TD>
   </TR>
   </TABLE>
@@ -48,32 +48,35 @@
 		<LI><A HREF="#add_as_clause">add_as_clause</A></LI>
 		<LI><A HREF="#add_equals_clause">add_equals_clause</A></LI>
 		<LI><A HREF="#add_comma_clause">add_comma_clause</A></LI>
+		<LI><A HREF="#add_assign_clause">add_assign_clause</A></LI>
 		<LI><A HREF="#set_as_clause">set_as_clause</A></LI>
 		<LI><A HREF="#set_equals_clause">set_equals_clause</A></LI>
 		<LI><A HREF="#set_comma_clause">set_comma_clause</A></LI>
+		<LI><A HREF="#set_assign_clause">set_assign_clause</A></LI>
 		<LI><A HREF="#to_array">to_array</A></LI>
 		<LI><A HREF="#to_hash">to_hash</A></LI>
 		<LI><A HREF="#add_array">add_array</A></LI>
 		<LI><A HREF="#add_hash">add_hash</A></LI>
+		<LI><A HREF="#get_input">get_input</A></LI>
 		<LI><A HREF="#configure_settings">configure_settings</A></LI>
 	</UL>
 
 	<LI><A HREF="#todo list">TODO LIST</A></LI>
 	<UL>
 
-		<LI><A HREF="#create add_assign_clause and set_assign_clause.">Create add_assign_clause and set_assign_clause.</A></LI>
+		<LI><A HREF="#think of more things to do. :)">Think of more things to do. :)</A></LI>
 	</UL>
 
 	<LI><A HREF="#other related work">OTHER RELATED WORK</A></LI>
 	<UL>
 
-		<LI><A HREF="#relations">Relations</A></LI>
-		<LI><A HREF="#relations::abstract">Relations::Abstract</A></LI>
-		<LI><A HREF="#relations::query">Relations::Query</A></LI>
-		<LI><A HREF="#relations.admin.inc.php">Relations.Admin.inc.php</A></LI>
-		<LI><A HREF="#relations::family">Relations::Family</A></LI>
-		<LI><A HREF="#relations::display">Relations::Display</A></LI>
-		<LI><A HREF="#relations::choice">Relations::Choice</A></LI>
+		<LI><A HREF="#relations (perl)">Relations (Perl)</A></LI>
+		<LI><A HREF="#relationsquery (perl)">Relations-Query (Perl)</A></LI>
+		<LI><A HREF="#relationsabstract (perl)">Relations-Abstract (Perl)</A></LI>
+		<LI><A HREF="#relationsadmin (php)">Relations-Admin (PHP)</A></LI>
+		<LI><A HREF="#relationsfamily (perl)">Relations-Family (Perl)</A></LI>
+		<LI><A HREF="#relationsdisplay (perl)">Relations-Display (Perl)</A></LI>
+		<LI><A HREF="#relationsreport (perl)">Relations-Report (Perl)</A></LI>
 	</UL>
 
 </UL>
@@ -107,17 +110,11 @@
     print &quot;Not avoiding the code...&quot;;</PRE>
 <PRE>
   }</PRE>
-<PRE>
-  configure_settings(-database =&gt; 'relations',
-                     -username =&gt; 'root',
-                     -password =&gt; '',
-                     -host     =&gt; 'localhost',
-                     -port     =&gt; 3306);</PRE>
 <P>
 <HR>
 <H1><A NAME="abstract">ABSTRACT</A></H1>
 <P>This perl library contains functions for dealing with databases.
-It's mainly used as the the foundation for all the other 
+It's mainly used as the foundation for all the other 
 Relations modules. It may be useful for people that deal with
 databases in Perl as well.</P>
 <P>The current version of Relations is available at</P>
@@ -128,26 +125,57 @@ databases in Perl as well.</P>
 <H1><A NAME="description">DESCRIPTION</A></H1>
 <P>
 <H2><A NAME="what it does">WHAT IT DOES</A></H2>
-<P>Relations has functions for creating clauses of queries (like where, 
+<P>Relations has functions for creating SQL clauses (like where, 
 from etc.) from hashes, arrays and strings. It also has functions
 for converting strings to arrays or hashes, if they're not hashes
 or arrays already. It even has an argument parser, which is 
 used quite heavily by the other Relations modules.</P>
 <P>
 <H2><A NAME="calling relations routines">CALLING RELATIONS ROUTINES</A></H2>
-<P>All standard Relations routines use an ordered argument calling style. 
-This is because the routines have very few arguments, and they're 
-mainly used bu other modules with far friendlier objects and 
-functions. So the argument order matters for all functions, and you 
-should consult the function defintions later in this document to 
-determine the proper order to use.</P>
+<P>All standard Relations routines use an ordered argument calling style, 
+with the exception of the <CODE>configure_settings()</CODE> and <CODE>get_input()</CODE> functions 
+which use an ordered, named, and hashed, argument calling style. This 
+is because most routines have only a few arguments, and the code is 
+easier to read with an ordered argument style. With the functions that
+have many arguments, the code is easier to understand given a named or 
+hashed argument style.</P>
+<P>If you use the ordered argument calling style, such as</P>
+<PRE>
+  $answer = get_input($question,$default);</PRE>
+<P>the order matters, and you should consult the function defintions 
+later in this document to determine the order to use.</P>
+<P>If you use the named argument calling style, such as</P>
+<PRE>
+  $answer = get_input(-question =&gt; $question,
+                      -default  =&gt; $default);</PRE>
+<P>the order does not matter, but the names, and minus signs preceeding them, do.
+You should consult the function defintions later in this document to determine 
+the names to use.</P>
+<P>In the named arugment style, each argument name is preceded by a dash.  
+Neither case nor order matters in the argument list. -question, -Question, and 
+-QUESTION are all acceptable.  In fact, only the first argument needs to begin 
+with a dash.  If a dash is present in the first argument, Relations assumes
+dashes for the subsequent ones.</P>
+<P>If you use the hashed argument calling style, such as</P>
+<PRE>
+  $answer = get_input({question =&gt; $question,
+                       default  =&gt; $default});</PRE>
+<P>or</P>
+<PRE>
+  $answer = get_input({-question =&gt; $question,
+                       -default  =&gt; $default});</PRE>
+<P>the order does not matter, but the names, and curly braces do, (minus signs are
+optional). You should consult the function defintions later in this document to 
+determine the names to use.</P>
+<P>In the hashed arugment style, no dashes are needed, but they won't cause problems
+if you put them in. Neither case nor order matters in the argument list. 
+-question, -Question, and  -QUESTION are all acceptable.  If a hash is the first 
+argument, Relations assumes that is the only argument that matters, and ignores 
+any other arguments after the {}'s.</P>
 <P>
 <HR>
 <H1><A NAME="list of relations functions">LIST OF RELATIONS FUNCTIONS</A></H1>
-<P>An example of each function is provided in 'test.pl'. When you run 
-it, don't be surprised if a bunch of stuff appears on the screen
-appearing to ask then answer questions. That's just test.pl 
-pretending to be you while it talks to itself. :)</P>
+<P>An example of each of these functions is provided in 'test.pl'.</P>
 <P>
 <H2><A NAME="rearrange">rearrange</A></H2>
 <PRE>
@@ -155,7 +183,7 @@ pretending to be you while it talks to itself. :)</P>
 <P>Rearranges arguments from either the straight ordered format, or 
 named format, into their respective variables.</P>
 <P><STRONG>$order</STRONG> - 
-Array ref to of argument names in their proper order. Names must
+Array ref of argument names in their proper order. Names must
 be capitalized.</P>
 <P><STRONG>@param</STRONG> - 
 Array of values to parse.</P>
@@ -172,19 +200,29 @@ Array of values to parse.</P>
                              'SECOND',
                              'THIRD'],@_);
   }</PRE>
-<P><STRONG>Calling:</STRONG></P>
+<P><STRONG>Calling Ordered:</STRONG></P>
 <PRE>
   example('one','two','three');</PRE>
+<P><STRONG>Calling Named:</STRONG></P>
 <PRE>
   example(-first  =&gt; 'one',
           -second =&gt; 'two',
           -third  =&gt; 'three');</PRE>
+<P><STRONG>Calling Hashed:</STRONG></P>
+<PRE>
+  example({first  =&gt; 'one',
+           second =&gt; 'two',
+           third  =&gt; 'three'});</PRE>
+<PRE>
+  example({-first  =&gt; 'one',
+           -second =&gt; 'two',
+           -third  =&gt; 'three'});</PRE>
 <P>
 <H2><A NAME="delimit_clause">delimit_clause</A></H2>
 <PRE>
   delimit_clause($minor,$major,$reverse,$clause);</PRE>
-<P>Creates a clause for a query from a hash ref,0 an array ref, or 
-string. If sent a hash ref, the field-value pairs will be concatentated 
+<P>Creates a clause for a query from a hash ref, an array ref, or 
+string. If sent a hash ref, the key-value pairs will be concatentated 
 with the minor string and those pairs will be concatenated with the major 
 string, and that string returned. If an array ref is sent, the members 
 of the array with will be concatenated with the major string, and that 
@@ -207,7 +245,7 @@ string.</P>
 <PRE>
   as_clause($as);</PRE>
 <P>Creates a 'select' or 'from' clause for a query from a hash ref, 
-an array ref, or string. If sent a hash ref, the field-value pairs 
+an array ref, or string. If sent a hash ref, the key-value pairs 
 will be concatentated with an ' as ' between each value-key pair and 
 those pairs will be concatenated with a ',' , and that string 
 returned. If an array ref is sent, the members of the array with will 
@@ -225,14 +263,14 @@ string.</P>
 <P><CODE>as_clause(['phone_num','address'])</CODE></P>
 <P>returns: ``phone_num,address''</P>
 <P><STRONG>String:</STRONG></P>
-<P><CODE>as_clause(``if(car='blue','sweet','ug')</CODE> as dude,sweet'')</P>
+<P><CODE>as_clause(``if(car='found','sweet','ug')</CODE> as dude,sweet'')</P>
 <P>returns: ``if(car='found','sweet','ug') as dude,sweet''</P>
 <P>
 <H2><A NAME="equals_clause">equals_clause</A></H2>
 <PRE>
   equals_clause($equals);</PRE>
 <P>Creates a 'where' or 'having' clause for a query from a hash ref, 
-array ref, or string. If sent a hash ref, the field-value pairs will 
+array ref, or string. If sent a hash ref, the key-value pairs will 
 be concatentated with an '=' between each value-key pair and those 
 pairs will be concatenated with a ' and ' , and that string returned. 
 If an array ref is sent, the members of the array with will be 
@@ -259,22 +297,23 @@ string.</P>
 <P>Creates a 'group by', 'order by' or 'limit' clause for a query from
 an array ref or string. If an array is sent, the members of the array 
 with will be concatenated with a ',' and that string returned. If 
-a string is sent, that string will be returned.</P>
+a string is sent, that string will be returned. Yes, you can send a 
+hash but the order won't be guarranteed, so don't do that.</P>
 <P><STRONG>$comma</STRONG> - 
 Info to parse into a clause. Can be an array ref, or string.</P>
 <P>EXAMPLES</P>
 <P><STRONG>Array:</STRONG></P>
-<P>comma_clause([``Age &gt; 40'',``Hair='grey'''])</P>
-<P>returns: ``Age &gt; 40 and Hair='grey'''</P>
+<P><CODE>comma_clause(['fee','fie','foe','fum'])</CODE></P>
+<P>returns: ``fee,fie,foe,fum''</P>
 <P><STRONG>String:</STRONG></P>
-<P>comma_clause(``reason is not null or intuition &gt; 25'')</P>
-<P>returns: ``reason is not null or intuition &gt; 25''</P>
+<P>comma_clause(``age desc,date'')</P>
+<P>returns: ``age desc,date''</P>
 <P>
 <H2><A NAME="assign_clause">assign_clause</A></H2>
 <PRE>
   assign_clause($assign);</PRE>
 <P>Creates a 'set' clause for a query from a hash ref, array ref, or string. 
-If sent a hash ref, the field-value pairs will be concatentated with an 
+If sent a hash ref, the key-value pairs will be concatentated with an 
 '=' between each value-key pair and those pairs will be concatenated with 
 a ',' , and that string returned. If an array ref is sent, the members of 
 the array with will be concatenated with a ',' and that string returned. 
@@ -302,8 +341,8 @@ a new as clause from what's to be added.</P>
 <P><STRONG>$as</STRONG> - 
 Existing as clause to add to. Must be a string.</P>
 <P><STRONG>$add_as</STRONG> - 
-As clause to add to. Can be a hash ref, array ref or string.
-See as_clause for more info.</P>
+As clause to add. Can be a hash ref, array ref or string.</P>
+<P>See as_clause for more info.</P>
 <P>
 <H2><A NAME="add_equals_clause">add_equals_clause</A></H2>
 <PRE>
@@ -313,8 +352,8 @@ a new equals clause from what's to be added.</P>
 <P><STRONG>$equals</STRONG> - 
 Existing equals clause to add to. Must be a string.</P>
 <P><STRONG>$add_equals</STRONG> - 
-Equals clause to add to. Can be a hash ref, array ref or string.
-See equals_clause for more info.</P>
+Equals clause to add. Can be a hash ref, array ref or string.</P>
+<P>See equals_clause for more info.</P>
 <P>
 <H2><A NAME="add_comma_clause">add_comma_clause</A></H2>
 <PRE>
@@ -324,41 +363,63 @@ a new comma clause from what's to be added.</P>
 <P><STRONG>$comma</STRONG> - 
 Existing comma clause to add to. Must be a string.</P>
 <P><STRONG>$add_comma</STRONG> - 
-Equals comma to add to. Can be a hash ref, array ref or string.
-See comma_clause for more info.</P>
+Comma clause to add. Can be a hash ref, array ref or string.</P>
+<P>See comma_clause for more info.</P>
+<P>
+<H2><A NAME="add_assign_clause">add_assign_clause</A></H2>
+<PRE>
+  add_assign_clause($assign,$add_assign);</PRE>
+<P>Adds more assign clause info onto an existing assign clause, or creates
+a new assign clause from what's to be added.</P>
+<P><STRONG>$assign</STRONG> - 
+Existing assign clause to add to. Must be a string.</P>
+<P><STRONG>$add_assign</STRONG> - 
+Assign clause to add. Can be a hash ref, array ref or string.</P>
+<P>See assign_clause for more info.</P>
 <P>
 <H2><A NAME="set_as_clause">set_as_clause</A></H2>
 <PRE>
   set_as_clause($as,$set_as);</PRE>
-<P>Overwrites as clause info over an existing as clause, only if the
-over writing info is not empty.</P>
+<P>Writes as clause info over an existing as clause, only if the
+over writing clause is not empty.</P>
 <P><STRONG>$as</STRONG> - 
-Existing as clause to add to. Must be a string.</P>
+Existing as clause to overwrite. Must be a string.</P>
 <P><STRONG>$set_as</STRONG> - 
-As clause to set. Can be a hash ref, array ref or string.
-See as_clause for more info.</P>
+As clause to set. Can be a hash ref, array ref or string.</P>
+<P>See as_clause for more info.</P>
 <P>
 <H2><A NAME="set_equals_clause">set_equals_clause</A></H2>
 <PRE>
   set_equals_clause($equals,$set_equals);</PRE>
-<P>Overwrites equals clause info over an existing equals clause, only if the
-over writing info is not empty.</P>
+<P>Writes equals clause info over an existing equals clause, only if the
+over writing clause is not empty.</P>
 <P><STRONG>$equals</STRONG> - 
-Existing equals clause to add to. Must be a string.</P>
+Existing equals clause to overwrite. Must be a string.</P>
 <P><STRONG>$set_equals</STRONG> - 
-Equals clause to set. Can be a hash ref, array ref or string.
-See equals_clause for more info.</P>
+Equals clause to set. Can be a hash ref, array ref or string.</P>
+<P>See equals_clause for more info.</P>
 <P>
 <H2><A NAME="set_comma_clause">set_comma_clause</A></H2>
 <PRE>
   set_comma_clause($comma,$set_comma);</PRE>
-<P>Overwrites comma clause info over an existing comma clause, only if the
-over writing info is not empty.</P>
+<P>Writes comma clause info over an existing comma clause, only if the
+over writing clause is not empty.</P>
 <P><STRONG>$comma</STRONG> - 
-Existing comma clause to add to. Must be a string.</P>
+Existing comma clause to overwrite. Must be a string.</P>
 <P><STRONG>$set_comma</STRONG> - 
-Comma clause to set. Can be a hash ref, array ref or string.
-See comma_clause for more info.</P>
+Comma clause to set. Can be a hash ref, array ref or string.</P>
+<P>See comma_clause for more info.</P>
+<P>
+<H2><A NAME="set_assign_clause">set_assign_clause</A></H2>
+<PRE>
+  set_assign_clause($assign,$set_assign);</PRE>
+<P>Writes assign clause info over an existing assign clause, only if the
+over writing clause is not empty.</P>
+<P><STRONG>$assign</STRONG> - 
+Existing assign clause to overwrite. Must be a string.</P>
+<P><STRONG>$set_assign</STRONG> - 
+Assign clause to set. Can be a hash ref, array ref or string.</P>
+<P>See assign_clause for more info.</P>
 <P>
 <H2><A NAME="to_array">to_array</A></H2>
 <PRE>
@@ -398,11 +459,29 @@ Array ref to add.</P>
 <H2><A NAME="add_hash">add_hash</A></H2>
 <PRE>
   add_hash($value,$adder);</PRE>
-<P>Takes two hash ref and adds the key value pairs from one to the other.</P>
+<P>Takes two hash ref and adds the key value pairs from one to the other.
+Does not take strings or arrays!</P>
 <P><STRONG>$value</STRONG> - 
 Hash ref to be added to.</P>
 <P><STRONG>$adder</STRONG> - 
 Hash ref to add.</P>
+<P>
+<H2><A NAME="get_input">get_input</A></H2>
+<PRE>
+  $answer = get_input($question,$default);</PRE>
+<PRE>
+  $answer = get_input(-question =&gt; $question,
+                      -default  =&gt; $default);</PRE>
+<P>Asks the user a question, cleans what the typed in, and returns the
+value typed in if there is one, or the default value is the user
+just hit return.</P>
+<P><STRONG>$question</STRONG> - 
+The question to ask the user.</P>
+<P><STRONG>$default</STRONG> - 
+The default answer to the question.</P>
+<P><STRONG>$answer</STRONG> - 
+If the user typed anything in, it'll be that, minus the newline. 
+If the user didn't type anything in, it'll be the default value.</P>
 <P>
 <H2><A NAME="configure_settings">configure_settings</A></H2>
 <PRE>
@@ -410,19 +489,19 @@ Hash ref to add.</P>
                      $username,
                      $password,
                      $host,
-                     $port)</PRE>
+                     $port);</PRE>
 <PRE>
   configure_settings(-database =&gt; $database,
                      -username =&gt; $username,
                      -password =&gt; $password,
                      -host     =&gt; $host,
-                     -port     =&gt; $port)</PRE>
+                     -port     =&gt; $port);</PRE>
 <P>Creates a default database settings module. Takes in the defaults, 
 prompts the user for info. If the user sends info, that's used. 
 Once the settings a determine, it creates a 'Settings.pm' file in 
 the current direfctory.</P>
 <P><STRONG>$database</STRONG> - 
-Default database name to use for test.pl or demo.pl</P>
+Default database name to use.</P>
 <P><STRONG>$username</STRONG> and <STRONG>$password</STRONG> - 
 Default MySQL account to use to connect to the database.</P>
 <P><STRONG>$host</STRONG> and <STRONG>$port</STRONG> - 
@@ -431,62 +510,56 @@ Default MySQL host and access port to use to connect to the database.</P>
 <HR>
 <H1><A NAME="todo list">TODO LIST</A></H1>
 <P>
-<H2><A NAME="create add_assign_clause and set_assign_clause.">Create add_assign_clause and set_assign_clause.</A></H2>
+<H2><A NAME="think of more things to do. :)">Think of more things to do. :)</A></H2>
 <P>
 <HR>
 <H1><A NAME="other related work">OTHER RELATED WORK</A></H1>
 <P>
-<H2><A NAME="relations">Relations</A></H2>
-<P>This perl library contains functions for dealing with databases.
-It's mainly used as the the foundation for all the other 
-Relations modules. It may be useful for people that deal with
-databases in Perl as well.</P>
+<H2><A NAME="relations (perl)">Relations (Perl)</A></H2>
+<P>Contains functions for dealing with databases. It's mainly used as 
+the foundation for the other Relations modules. It may be useful for 
+people that deal with databases as well.</P>
 <P>
-<H2><A NAME="relations::abstract">Relations::Abstract</A></H2>
-<P>A DBI/DBD::mysql Perl module. Meant to save development time and code 
-space. It takes the most common (in my experience) collection of DBI 
-calls to a MySQL databate, and changes them to one liner calls to an
-object.</P>
-<P>
-<H2><A NAME="relations::query">Relations::Query</A></H2>
-<P>An Perl object oriented form of a SQL select query. Takes hash refs,
-array refs, or strings for different clauses (select,where,limit)
+<H2><A NAME="relationsquery (perl)">Relations-Query (Perl)</A></H2>
+<P>An object oriented form of a SQL select query. Takes hashes.
+arrays, or strings for different clauses (select,where,limit)
 and creates a string for each clause. Also allows users to add to
 existing clauses. Returns a string which can then be sent to a 
-MySQL DBI handle.</P>
+database.</P>
 <P>
-<H2><A NAME="relations.admin.inc.php">Relations.Admin.inc.php</A></H2>
-<P>Some generalized PHP classes for creating Web interfaces to relational 
-databases. Allows users to add, view, update, and delete records from 
+<H2><A NAME="relationsabstract (perl)">Relations-Abstract (Perl)</A></H2>
+<P>Meant to save development time and code space. It takes the most common 
+(in my experience) collection of calls to a MySQL database, and changes 
+them to one liner calls to an object.</P>
+<P>
+<H2><A NAME="relationsadmin (php)">Relations-Admin (PHP)</A></H2>
+<P>Some generalized objects for creating Web interfaces to relational 
+databases. Allows users to insert, select, update, and delete records from 
 different tables. It has functionality to use tables as lookup values 
 for records in other tables.</P>
 <P>
-<H2><A NAME="relations::family">Relations::Family</A></H2>
-<P>A Perl query engine for relational databases.  It queries members from 
+<H2><A NAME="relationsfamily (perl)">Relations-Family (Perl)</A></H2>
+<P>Query engine for relational databases.  It queries members from 
 any table in a relational database using members selected from any 
 other tables in the relational database. This is especially useful with 
-complex databases; databases with many tables and many connections 
+complex databases: databases with many tables and many connections 
 between tables.</P>
 <P>
-<H2><A NAME="relations::display">Relations::Display</A></H2>
-<P>An Perl module creating GD::Graph objects from database queries. It 
-takes in a query through a Relations::Query object, along with 
-information pertaining to which field values from the query results are 
-to be used in creating the graph title, x axis label and titles, legend 
-label (not used on the graph) and titles, and y axis data. Returns a 
-GD::Graph object built from from the query.</P>
+<H2><A NAME="relationsdisplay (perl)">Relations-Display (Perl)</A></H2>
+<P>Module creating graphs from database queries. It takes in a query through a 
+Relations-Query object, along with information pertaining to which field 
+values from the query results are to be used in creating the graph title, 
+x axis label and titles, legend label (not used on the graph) and titles, 
+and y axis data. Returns a graph and/or table built from from the query.</P>
 <P>
-<H2><A NAME="relations::choice">Relations::Choice</A></H2>
-<P>An Perl CGI interface for Relations::Family, Reations::Query, and 
-Relations::Display. It creates complex (too complex?) web pages for 
-selecting from the different tables in a Relations::Family object. 
-It also has controls for specifying the grouping and ordering of data
-with a Relations::Query object, which is also based on selections in 
-the Relations::Family object. That Relations::Query can then be passed
-to a Relations::Display object, and a graph or table will be displayed.
-A working model already exists in a production enviroment. I'd like to 
-streamline it, and add some more functionality before releasing it to 
-the world. Shooting for early mid Summer 2001.</P>
+<H2><A NAME="relationsreport (perl)">Relations-Report (Perl)</A></H2>
+<P>An Web interface for Relations-Family, Reations-Query, and Relations-Display. 
+It creates complex (too complex?) web pages for selecting from the different 
+tables in a Relations-Family object. It also has controls for specifying the 
+grouping and ordering of data with a Relations-Query object, which is also 
+based on selections in the Relations-Family object. That Relations-Query can 
+then be passed to a Relations-Display object, and a graph and/or table will 
+be displayed.</P>
 
 
     <!-- beginning of leaf footer-->
@@ -495,7 +568,7 @@ the world. Shooting for early mid Summer 2001.</P>
     <TR>
       <TD valign=middle
         bgcolor='#cc0066'> <font face='sans-serif' size='+1'
-        color='#ff99cc'>&nbsp;&nbsp;&nbsp;Relations - DBI/DBD::mysql functions to ease development</font>
+        color='#ff99cc'>&nbsp;&nbsp;&nbsp;Relations - Functions to Use with Databases and Queries</font>
       </TD>
     </TR>
     </TABLE>
