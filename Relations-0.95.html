@@ -61,6 +61,7 @@
 		<LI><A HREF="#configure_settings">configure_settings</A></LI>
 	</UL>
 
+	<LI><A HREF="#changes">CHANGES</A></LI>
 	<LI><A HREF="#todo list">TODO LIST</A></LI>
 	<UL>
 
@@ -77,6 +78,7 @@
 		<LI><A HREF="#relationsfamily (perl)">Relations-Family (Perl)</A></LI>
 		<LI><A HREF="#relationsdisplay (perl)">Relations-Display (Perl)</A></LI>
 		<LI><A HREF="#relationsreport (perl)">Relations-Report (Perl)</A></LI>
+		<LI><A HREF="#relationsstructure (xml)">Relations-Structure (XML)</A></LI>
 	</UL>
 
 </UL>
@@ -97,7 +99,7 @@
 <PRE>
   $query = &quot;select $as_clause from person&quot;;</PRE>
 <PRE>
-  $avoid = to_hash('virus,bug');</PRE>
+  $avoid = to_hash(&quot;virus\tbug&quot;,&quot;\t&quot;);</PRE>
 <PRE>
   if ($avoid-&gt;{bug}) {</PRE>
 <PRE>
@@ -424,27 +426,36 @@ Assign clause to set. Can be a hash ref, array ref or string.</P>
 <H2><A NAME="to_array">to_array</A></H2>
 <PRE>
   to_array($value);</PRE>
-<P>Takes a comma delimitted string or array ref and returns an array ref.
-If a comma delimitted string is sent, it splits the string by the 
-commas.</P>
+<PRE>
+  to_array($value,$split);</PRE>
+<P>Takes a delimitted string or array ref and returns an array ref.
+If a delimitted string is sent, it splits the string by the 
+$split. If $split is not sent, it splits by a comma.</P>
 <P><STRONG>$value</STRONG> - 
-Value to convert or just send back. Can be an array ref or comma 
-delimitted string.</P>
+Value to convert or just copy. Can be an array ref or delimitted 
+string.</P>
+<P><STRONG>$split</STRONG> - 
+String to split $value by. If this is not sent a comma is assumed.</P>
 <P>
 <H2><A NAME="to_hash">to_hash</A></H2>
 <PRE>
   to_hash($value);</PRE>
-<P>Takes a comma delimitted string, array ref or hash ref and returns 
+<PRE>
+  to_hash($value,$split);</PRE>
+<P>Takes a delimitted string, array ref or hash ref and returns 
 a hash ref. The hash ref returned will have keys based on the string,
-array ref, or hash ref, with the keyed values being 1. If a comma 
-delimitted string is sent, it splits the string by the commas into 
+array ref, or hash ref, with the keyed values being 1. If a 
+delimitted string is sent, it splits the string by $split into 
 an array, and that array is used to add keys to a hash, with the 
 values being 1 and the hash ref returned. If an array is sent, that 
 array is used to add keys to a hash, with the values being 1 and the
-hash ref returned. If a hash ref is sent, its just returned.</P>
+hash ref returned. If a hash ref is sent, its just copied and 
+returned.</P>
 <P><STRONG>$value</STRONG> - 
-Value to convert or just send back. Can be a hash ref, array ref or 
-comma delimitted string.</P>
+Value to convert or just copy. Can be a hash ref, array ref or 
+delimitted string.</P>
+<P><STRONG>$split</STRONG> - 
+String to split $value by. If this is not sent a comma is assumed.</P>
 <P>
 <H2><A NAME="add_array">add_array</A></H2>
 <PRE>
@@ -508,6 +519,17 @@ Default MySQL account to use to connect to the database.</P>
 Default MySQL host and access port to use to connect to the database.</P>
 <P>
 <HR>
+<H1><A NAME="changes">CHANGES</A></H1>
+<P>Now <CODE>to_array()</CODE> and <CODE>to_hash()</CODE> make copies of sent arrays and hashes. 
+This was done because the more complex modules, Relations-Display and
+Relations-Report were sending references to their own arrays and 
+those arrays were getting modified. Rather than inject a ton of 
+special code to get around this, I figured I'd change just two 
+functions.</P>
+<P>You can also specify a delimitter for <CODE>to_array()</CODE> and to_hash(). I
+did this mostly because I was bored. :)</P>
+<P>
+<HR>
 <H1><A NAME="todo list">TODO LIST</A></H1>
 <P>
 <H2><A NAME="think of more things to do. :)">Think of more things to do. :)</A></H2>
@@ -553,13 +575,21 @@ x axis label and titles, legend label (not used on the graph) and titles,
 and y axis data. Returns a graph and/or table built from from the query.</P>
 <P>
 <H2><A NAME="relationsreport (perl)">Relations-Report (Perl)</A></H2>
-<P>An Web interface for Relations-Family, Reations-Query, and Relations-Display. 
+<P>A Web interface for Relations-Family, Reations-Query, and Relations-Display. 
 It creates complex (too complex?) web pages for selecting from the different 
 tables in a Relations-Family object. It also has controls for specifying the 
 grouping and ordering of data with a Relations-Query object, which is also 
 based on selections in the Relations-Family object. That Relations-Query can 
 then be passed to a Relations-Display object, and a graph and/or table will 
 be displayed.</P>
+<P>
+<H2><A NAME="relationsstructure (xml)">Relations-Structure (XML)</A></H2>
+<P>An XML standard for Relations configuration data. With future goals being 
+implmentations of Relations in different languages (current targets are 
+Perl, PHP and Java), there should be some way of sharing configuration data
+so that one can switch application languages seamlessly. That's the goal
+of Relations-Structure A standard so that Relations objects can 
+export/import their configuration through XML.</P>
 
 
     <!-- beginning of leaf footer-->

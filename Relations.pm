@@ -16,7 +16,7 @@ require 5.004;
 # This program is free software, you can redistribute it and/or modify it under
 # the same terms as Perl istelf
 
-$Relations::VERSION='0.94';
+$Relations::VERSION='0.95';
 
 @ISA = qw(Exporter);
 
@@ -597,48 +597,50 @@ sub set_assign_clause {
 
 
 
-### Takes a comma delimitted string or array ref 
-### and returns an array ref.
+### Takes a delimitted string or array ref and 
+### returns an array ref. If an array ref is sent, 
+### a copy of the array is returned, not the 
+### original array.
 
 sub to_array {
 
-  # Grab the value sent. 
+  # Grab the value sent and what to split by only
+  # if split was sent. Else split by a comma.
 
   my $value = shift;
+  my $split = scalar @_ ? shift : ',';
 
-  # Unless it's a reference to something
+  # Declare the return array. Set it to the $value
+  # if $value's a ref, else split $value by commas.
 
-  unless (ref($value)) {
-
-    # Assume its a comma delimitted string and
-    # break it up into an array.
-
-    my @value = split ',', $value;
-
-    # Store the new array ref in $value
-
-    $value = \@value;
-
-  }
+  my @value = ref($value) ? @$value : split $split, $value;
 
   # Return the array refence
   
-  return $value;
+  return \@value;
 
 }
 
 
 
-### Takes a comma delimitted string, array ref or 
-### hash ref and returns a hash ref. The hash
-### reference will have the individual values as
-### keys with their values set to true.
+### Takes a delimitted string, array ref or hash ref 
+### and returns a hash ref. The hash reference will 
+### have the individual values as keys with their 
+### values set to true. If an hash ref is sent, a 
+### copy of the hash is returned, not the original 
+### hash.
 
 sub to_hash {
 
-  # Grab the value sent. 
+  # Grab the value sent and what to split by only
+  # if split was sent. Else split by a comma.
 
   my $value = shift;
+  my $split = scalar @_ ? shift : ',';
+
+  # Declare the hash to send back.
+
+  my %value = ();
 
   # Unless it's a hash reference 
 
@@ -647,11 +649,7 @@ sub to_hash {
     # Assume its a comma delimitted string or an
     # array ref and send it to to_array
 
-    $value = to_array($value);
-
-    # Declare the hash to send back.
-
-    my %value = ();
+    $value = to_array($value,$split);
 
     # Go through each one, settting the 
     # key's value to true.
@@ -662,15 +660,17 @@ sub to_hash {
 
     }
 
-    # Store the new hash ref in $value
+  } else {
 
-    $value = \%value;
+    # Dump the sent hash into our hash
+
+    %value = %$value;
 
   }
 
   # Return the hash refence
   
-  return $value;
+  return \%value;
 
 }
 
@@ -863,7 +863,7 @@ Relations - Functions to Use with Databases and Queries
 
   $query = "select $as_clause from person";
 
-  $avoid = to_hash('virus,bug');
+  $avoid = to_hash("virus\tbug","\t");
 
   if ($avoid->{bug}) {
 
@@ -1292,30 +1292,41 @@ See assign_clause for more info.
 
   to_array($value);
 
-Takes a comma delimitted string or array ref and returns an array ref.
-If a comma delimitted string is sent, it splits the string by the 
-commas.
+  to_array($value,$split);
+
+Takes a delimitted string or array ref and returns an array ref.
+If a delimitted string is sent, it splits the string by the 
+$split. If $split is not sent, it splits by a comma.
 
 B<$value> - 
-Value to convert or just send back. Can be an array ref or comma 
-delimitted string.
+Value to convert or just copy. Can be an array ref or delimitted 
+string.
+
+B<$split> - 
+String to split $value by. If this is not sent a comma is assumed.
 
 =head2 to_hash
 
   to_hash($value);
 
-Takes a comma delimitted string, array ref or hash ref and returns 
+  to_hash($value,$split);
+
+Takes a delimitted string, array ref or hash ref and returns 
 a hash ref. The hash ref returned will have keys based on the string,
-array ref, or hash ref, with the keyed values being 1. If a comma 
-delimitted string is sent, it splits the string by the commas into 
+array ref, or hash ref, with the keyed values being 1. If a 
+delimitted string is sent, it splits the string by $split into 
 an array, and that array is used to add keys to a hash, with the 
 values being 1 and the hash ref returned. If an array is sent, that 
 array is used to add keys to a hash, with the values being 1 and the
-hash ref returned. If a hash ref is sent, its just returned.
+hash ref returned. If a hash ref is sent, its just copied and 
+returned.
 
 B<$value> - 
-Value to convert or just send back. Can be a hash ref, array ref or 
-comma delimitted string.
+Value to convert or just copy. Can be a hash ref, array ref or 
+delimitted string.
+
+B<$split> - 
+String to split $value by. If this is not sent a comma is assumed.
 
 =head2 add_array
 
@@ -1392,6 +1403,18 @@ Default MySQL account to use to connect to the database.
 B<$host> and B<$port> - 
 Default MySQL host and access port to use to connect to the database. 
 
+=head1 CHANGES
+
+Now to_array() and to_hash() make copies of sent arrays and hashes. 
+This was done because the more complex modules, Relations-Display and
+Relations-Report were sending references to their own arrays and 
+those arrays were getting modified. Rather than inject a ton of 
+special code to get around this, I figured I'd change just two 
+functions.
+
+You can also specify a delimitter for to_array() and to_hash(). I
+did this mostly because I was bored. :)
+
 =head1 TODO LIST
 
 =head2 Think of more things to do. :)
@@ -1443,12 +1466,21 @@ and y axis data. Returns a graph and/or table built from from the query.
 
 =head2 Relations-Report (Perl)
 
-An Web interface for Relations-Family, Reations-Query, and Relations-Display. 
+A Web interface for Relations-Family, Reations-Query, and Relations-Display. 
 It creates complex (too complex?) web pages for selecting from the different 
 tables in a Relations-Family object. It also has controls for specifying the 
 grouping and ordering of data with a Relations-Query object, which is also 
 based on selections in the Relations-Family object. That Relations-Query can 
 then be passed to a Relations-Display object, and a graph and/or table will 
 be displayed.
+
+=head2 Relations-Structure (XML)
+
+An XML standard for Relations configuration data. With future goals being 
+implmentations of Relations in different languages (current targets are 
+Perl, PHP and Java), there should be some way of sharing configuration data
+so that one can switch application languages seamlessly. That's the goal
+of Relations-Structure A standard so that Relations objects can 
+export/import their configuration through XML. 
 
 =cut

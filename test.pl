@@ -165,17 +165,44 @@ die "to_array failed string" unless (($thing->[0] eq 'fee') and
                                      ($thing->[1] eq 'fie') and 
                                      ($thing->[2] eq 'foe'));
 
+$thong = to_array("lee\tlie\tlow","\t");
+
+die "to_array failed split" unless (($thong->[0] eq 'lee') and 
+                                    ($thong->[1] eq 'lie') and 
+                                    ($thong->[2] eq 'low'));
+
 $thang = to_array(['me','my','moe']);
 
 die "to_array failed array" unless (($thang->[0] eq 'me') and 
                                     ($thang->[1] eq 'my') and 
                                     ($thang->[2] eq 'moe'));
 
+@noop = (1,2,3);
+
+$noop = to_array(\@noop);
+
+$noop->[0] = 4;
+$noop->[1] = 5;
+$noop->[2] = 6;
+
+die "to_array failed copy" unless (($noop[0] == 1) and 
+                                   ($noop[1] == 2) and 
+                                   ($noop[2] == 3) and 
+                                   ($noop->[0] == 4) and 
+                                   ($noop->[1] == 5) and 
+                                   ($noop->[2] == 6));
+
 $bing = to_hash('fee,fie,foe');
 
 die "to_hash failed string" unless ($bing->{'fee'} and 
                                     $bing->{'fie'} and 
                                     $bing->{'foe'});
+
+$bung = to_hash("lee\tlie\tlow","\t");
+
+die "to_hash failed split" unless ($bung->{'lee'} and 
+                                   $bung->{'lie'} and 
+                                   $bung->{'low'});
 
 $bang = to_hash(['me','my','moe']);
 
@@ -190,6 +217,23 @@ $bong = to_hash({'see'  => 1,
 die "to_hash failed hash" unless ($bong->{'see'} and 
                                   $bong->{'sigh'} and 
                                   $bong->{'so'});
+
+%noop = ('a' => 1,
+         'b' => 2,
+         'c' => 3);
+
+$noop = to_hash(\%noop);
+
+$noop->{'a'} = 4;
+$noop->{'b'} = 5;
+$noop->{'c'} = 6;
+
+die "to_hash failed copy" unless (($noop{'a'} == 1) and 
+                                  ($noop{'b'} == 2) and 
+                                  ($noop{'c'} == 3) and 
+                                  ($noop->{'a'} == 4) and 
+                                  ($noop->{'b'} == 5) and 
+                                  ($noop->{'c'} == 6));
 
 $sing = add_array(['earth','air'],['fire','water']);
 

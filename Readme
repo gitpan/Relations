@@ -1,6 +1,6 @@
 NAME
 
-  Relations v0.94
+  Relations v0.95
 
 DESCRIPTION
 
@@ -21,13 +21,13 @@ INSTALlATION
  
     perl 5.004
 
-  WIN32 (Relations-0.94.zip)
+  WIN32 (Relations-0.95.zip)
 
     Extract zip file into a directory and type
 
     ppm install Relations.ppd
 
-  UN*X (Relations-0.94.tar.gz)
+  UN*X (Relations-0.95.tar.gz)
 
     Extract bundle into a directory and type
 
