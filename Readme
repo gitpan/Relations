@@ -1,0 +1,44 @@
+NAME
+
+  Relations v0.93
+
+DESCRIPTION
+
+  This package contains some generalized functions for 
+  dealing with databases and queries.
+
+COPYRIGHT
+
+  Copyright 2001 GAF-3 Industries, Inc. All rights reserved.
+  Written by George A. Fitch III (aka Gaffer), gaf3@gaf3.com
+
+  This program is free software, you can redistribute it and/or modify it under
+  the same terms as Perl istelf
+
+INSTALlATION
+
+  REQUIRED
+ 
+    perl 5.004
+
+  WIN32 (Relations-0.93.zip)
+
+    Extract zip file into a directory and type
+
+    ppm install Relations.ppd
+
+  UN*X (Relations-0.93.tar.gz)
+
+    Extract bundle into a directory and type
+
+    perl Makefile.PL
+    make
+    make install
+
+TESTING
+
+  After installing, run test.pl by typing 
+
+    perl test.pl
+
+  while in the installation directory.
